@@ -87,7 +87,7 @@ class _MyclassState extends State {
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(2024),
-      lastDate: DateTime(2025),
+      lastDate: DateTime(2026),
     );
     String formattedDate = DateFormat.yMMMd().format(pickedDate!);
 
@@ -279,7 +279,9 @@ class _MyclassState extends State {
         backgroundColor: color,
       ),
       body: ListView.builder(
-        physics: const BouncingScrollPhysics(),
+        physics: (list.length > 4)
+            ? const BouncingScrollPhysics()
+            : const AlwaysScrollableScrollPhysics(),
         itemCount: list.length,
         itemBuilder: (context, index) {
           return Center(
