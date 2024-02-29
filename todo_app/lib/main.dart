@@ -12,6 +12,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       home: ToDo(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -23,10 +24,10 @@ class ToDo extends StatefulWidget {
 }
 
 class NewTask {
-  final String title;
-  final String description;
-  final String date;
-  const NewTask(this.title, this.description, this.date);
+  String? title;
+  String? description;
+  String? date;
+  NewTask({this.title, this.description, this.date});
 }
 
 class _MyclassState extends State {
@@ -44,13 +45,58 @@ class _MyclassState extends State {
   final TextEditingController _dateController = TextEditingController();
   Color color = const Color(0xFF02A7B1);
 
-  myBottomSheet(int temp) {
-    if (temp != -1) {
-      _titleController.text = list[temp].title;
-      _descriptionController.text = list[temp].description;
-      _dateController.text = list[temp].date;
+  void submit(bool doEdit, [NewTask? obj]) {
+    if (doEdit) {
+      setState(() {
+        obj!.title = _titleController.text;
+        obj.description = _descriptionController.text;
+        obj.date = _dateController.text;
+      });
+    } else {
+      setState(() {
+        list.add(
+          NewTask(
+            title: _titleController.text,
+            description: _descriptionController.text,
+            date: _dateController.text,
+          ),
+        );
+      });
     }
+    Navigator.pop(context);
+    clearControllers();
+  }
 
+  void editTask(NewTask obj) {
+    setState(() {
+      _titleController.text = obj.title!;
+      _descriptionController.text = obj.description!;
+      _dateController.text = obj.date!;
+    });
+    myBottomSheet(true, obj);
+  }
+
+  void clearControllers() {
+    _titleController.clear();
+    _descriptionController.clear();
+    _dateController.clear();
+  }
+
+  void pickDate() async {
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2024),
+      lastDate: DateTime(2025),
+    );
+    String formattedDate = DateFormat.yMMMd().format(pickedDate!);
+
+    setState(() {
+      _dateController.text = formattedDate;
+    });
+  }
+
+  myBottomSheet(bool doEdit, [NewTask? obj]) {
     showModalBottomSheet(
         isScrollControlled: true,
         context: context,
@@ -148,24 +194,13 @@ class _MyclassState extends State {
                                 child: TextField(
                                   controller: _dateController,
                                   readOnly: true,
-                                  onTap: () async {
-                                    DateTime? pickedDate = await showDatePicker(
-                                      context: context,
-                                      initialDate: DateTime.now(),
-                                      firstDate: DateTime(2024),
-                                      lastDate: DateTime(2025),
-                                    );
-                                    String formattedDate =
-                                        DateFormat.yMMMd().format(pickedDate!);
-
-                                    setState(() {
-                                      _dateController.text = formattedDate;
-                                    });
-                                  },
+                                  onTap: () => pickDate(),
                                   decoration: InputDecoration(
                                     border: InputBorder.none,
                                     suffixIcon: IconButton(
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        pickDate();
+                                      },
                                       icon:
                                           const Icon(Icons.date_range_outlined),
                                     ),
@@ -185,36 +220,20 @@ class _MyclassState extends State {
                                   ),
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      if (_titleController.text.isNotEmpty &&
-                                          _descriptionController
-                                              .text.isNotEmpty &&
-                                          _dateController.text.isNotEmpty) {
-                                        setState(() {
-                                          if (temp == -1) {
-                                            list.add(
-                                              NewTask(
-                                                  _titleController.text,
-                                                  _descriptionController.text,
-                                                  _dateController.text),
-                                            );
-                                          } else {
-                                            // list[temp].title =
-                                            //     _titleController.text;
-                                            // list[temp].description =
-                                            //     _descriptionController.text;
-                                            // list[temp].date =
-                                            //     _dateController.text;
-
-                                            list[temp] = NewTask(
-                                                _titleController.text,
-                                                _descriptionController.text,
-                                                _dateController.text);
-                                          }
-                                          _titleController.clear();
-                                          _descriptionController.clear();
-                                          _dateController.clear();
-                                        });
-                                        Navigator.pop(context);
+                                      if (_titleController.text
+                                              .trim()
+                                              .isNotEmpty &&
+                                          _descriptionController.text
+                                              .trim()
+                                              .isNotEmpty &&
+                                          _dateController.text
+                                              .trim()
+                                              .isNotEmpty) {
+                                        if (doEdit) {
+                                          submit(doEdit, obj);
+                                        } else {
+                                          submit(doEdit);
+                                        }
                                       }
                                     },
                                     style: ElevatedButton.styleFrom(
@@ -260,12 +279,14 @@ class _MyclassState extends State {
         backgroundColor: color,
       ),
       body: ListView.builder(
+        physics: const BouncingScrollPhysics(),
         itemCount: list.length,
         itemBuilder: (context, index) {
           return Center(
             child: Card(
               margin: const EdgeInsets.only(top: 30),
               elevation: 10,
+              shadowColor: colors[(index % colors.length)],
               child: Container(
                 height: 150,
                 width: 370,
@@ -289,8 +310,9 @@ class _MyclassState extends State {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(52),
                             color: Colors.white,
+                            image: const DecorationImage(
+                                image: AssetImage('assets/logo2.png')),
                           ),
-                          child: const Icon(Icons.image),
                         ),
                         Container(
                           margin: const EdgeInsets.only(
@@ -314,8 +336,11 @@ class _MyclassState extends State {
                           height: 20,
                         ),
                         SizedBox(
+                          width: 260,
                           child: Text(
                             list[index].title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -326,10 +351,11 @@ class _MyclassState extends State {
                           height: 6,
                         ),
                         SizedBox(
+                          width: 260,
                           child: Text(
                             list[index].description,
-                            maxLines: 5,
-                            overflow: TextOverflow.visible,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               fontSize: 14,
                             ),
@@ -343,7 +369,7 @@ class _MyclassState extends State {
                             ),
                             GestureDetector(
                               onTap: () {
-                                myBottomSheet(index);
+                                editTask(list[index]);
                               },
                               child: const Icon(
                                 Icons.edit_outlined,
@@ -384,7 +410,8 @@ class _MyclassState extends State {
         backgroundColor: color,
         shape: const CircleBorder(),
         onPressed: () {
-          myBottomSheet(-1);
+          clearControllers();
+          myBottomSheet(false);
         },
         tooltip: 'Add new task',
         child: const Icon(
