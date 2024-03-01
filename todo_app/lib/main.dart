@@ -11,16 +11,16 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: ToDo(),
+      home: ToDoApp(),
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
-class ToDo extends StatefulWidget {
-  const ToDo({super.key});
+class ToDoApp extends StatefulWidget {
+  const ToDoApp({super.key});
   @override
-  State createState() => _MyclassState();
+  State createState() => _ToDoAppState();
 }
 
 class NewTask {
@@ -30,7 +30,7 @@ class NewTask {
   NewTask({this.title, this.description, this.date});
 }
 
-class _MyclassState extends State {
+class _ToDoAppState extends State {
   List<Color> colors = [
     const Color(0xFFFAE8E8),
     const Color(0xFFE8EDFA),
@@ -279,9 +279,9 @@ class _MyclassState extends State {
         backgroundColor: color,
       ),
       body: ListView.builder(
-        physics: (list.length > 4)
-            ? const BouncingScrollPhysics()
-            : const AlwaysScrollableScrollPhysics(),
+        physics: const BouncingScrollPhysics(
+          parent: AlwaysScrollableScrollPhysics(),
+        ),
         itemCount: list.length,
         itemBuilder: (context, index) {
           return Center(
@@ -313,7 +313,8 @@ class _MyclassState extends State {
                             borderRadius: BorderRadius.circular(52),
                             color: Colors.white,
                             image: const DecorationImage(
-                                image: AssetImage('assets/logo2.png')),
+                              image: AssetImage('assets/logo2.png'),
+                            ),
                           ),
                         ),
                         Container(
