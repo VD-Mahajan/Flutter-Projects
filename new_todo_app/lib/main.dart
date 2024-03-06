@@ -69,13 +69,15 @@ class _ToDoNewState extends State {
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
 
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   void clearControllers() {
     _titleController.clear();
     _descriptionController.clear();
     _dateController.clear();
   }
 
-  void dataPicker() async {
+  void datePicker() async {
     DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -229,7 +231,6 @@ class _ToDoNewState extends State {
                                                       TextOverflow.ellipsis,
                                                   style: const TextStyle(
                                                     fontWeight: FontWeight.bold,
-                                                    // color: Color(0xff000000),
                                                   ),
                                                 ),
                                               ),
@@ -312,89 +313,126 @@ class _ToDoNewState extends State {
                   ),
                   child: Text('Create To-Do'),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Title'),
-                    TextFormField(
-                      controller: _titleController,
-                      maxLines: null,
-                      decoration: InputDecoration(
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide:
-                              const BorderSide(color: Color(0xff6F51FF)),
-                        ),
-                        // enabled: true,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                            color: Color(0xff6F51FF),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    const Text('Description'),
-                    TextFormField(
-                      controller: _descriptionController,
-                      maxLines: null,
-                      decoration: InputDecoration(
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide:
-                              const BorderSide(color: Color(0xff6F51FF)),
-                        ),
-                        // enabled: true,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                            color: Color(0xff6F51FF),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    const Text('Date'),
-                    GestureDetector(
-                      child: TextFormField(
-                        controller: _dateController,
-                        readOnly: true,
-                        onTap: () {
-                          dataPicker();
-                        },
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Title'),
+                      TextFormField(
+                        controller: _titleController,
+                        maxLines: null,
                         decoration: InputDecoration(
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                             borderSide:
                                 const BorderSide(color: Color(0xff6F51FF)),
                           ),
+                          // enabled: true,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                             borderSide: const BorderSide(
                               color: Color(0xff6F51FF),
                             ),
                           ),
-                          suffixIcon: IconButton(
-                            onPressed: () {},
-                            icon: const Icon(
-                              Icons.calendar_month_outlined,
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return "Please add Title";
+                          } else {
+                            null;
+                          }
+                        },
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      const Text('Description'),
+                      TextFormField(
+                        controller: _descriptionController,
+                        maxLines: null,
+                        decoration: InputDecoration(
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide:
+                                const BorderSide(color: Color(0xff6F51FF)),
+                          ),
+                          // enabled: true,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(
+                              color: Color(0xff6F51FF),
                             ),
                           ),
                         ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return "Please add Description";
+                          } else {
+                            null;
+                          }
+                        },
                       ),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                  ],
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      const Text('Date'),
+                      GestureDetector(
+                        child: TextFormField(
+                          controller: _dateController,
+                          readOnly: true,
+                          onTap: () {
+                            datePicker();
+                          },
+                          decoration: InputDecoration(
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide:
+                                  const BorderSide(color: Color(0xff6F51FF)),
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: Color(0xff6F51FF),
+                              ),
+                            ),
+                            suffixIcon: IconButton(
+                              onPressed: () {
+                                datePicker();
+                              },
+                              icon: const Icon(
+                                Icons.calendar_month_outlined,
+                              ),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return "Please select Date";
+                            } else {
+                              null;
+                            }
+                          },
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                    ],
+                  ),
                 ),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    bool taskUpdated = _formKey.currentState!.validate();
+                    if (taskUpdated) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Task updated"),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                      Navigator.of(context).pop();
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xff6F51FF),
                     shape: RoundedRectangleBorder(
