@@ -1,7 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 
 void main() {
   runApp(const MainApp());
@@ -66,6 +64,31 @@ class _ToDoNewState extends State {
     ),
   ];
 
+  //VARIABLES
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _dateController = TextEditingController();
+
+  void clearControllers() {
+    _titleController.clear();
+    _descriptionController.clear();
+    _dateController.clear();
+  }
+
+  void dataPicker() async {
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2024),
+      lastDate: DateTime(2026),
+    );
+    String formattedDate = DateFormat.yMMMd().format(pickedDate!);
+
+    setState(() {
+      _dateController.text = formattedDate;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,14 +140,12 @@ class _ToDoNewState extends State {
                       "CREATE TO DO LIST",
                       style: TextStyle(
                         fontSize: 12,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
                   Expanded(
                     child: Container(
-                      // height: 600,
-                      padding: const EdgeInsets.only(top: 35),
                       decoration: const BoxDecoration(
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(40),
@@ -132,20 +153,21 @@ class _ToDoNewState extends State {
                         ),
                         color: Colors.white,
                       ),
-                      child: ListView.builder(
-                        itemCount: toDoList.length,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.only(
-                              top: 15,
-                            ),
-                            child: Container(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 35),
+                        child: ListView.builder(
+                          itemCount: toDoList.length,
+                          itemBuilder: (context, index) {
+                            return Container(
+                              margin: const EdgeInsets.symmetric(
+                                vertical: 7,
+                              ),
                               decoration: const BoxDecoration(
                                 boxShadow: [
                                   BoxShadow(
-                                    blurRadius: 5,
+                                    blurRadius: 10,
                                     color: Color(0xffD9D9D9),
-                                    offset: Offset(5, 10),
+                                    offset: Offset(10, 10),
                                   ),
                                 ],
                                 color: Colors.white,
@@ -159,7 +181,7 @@ class _ToDoNewState extends State {
                                     children: [
                                       Padding(
                                         padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
+                                          horizontal: 15,
                                           vertical: 30,
                                         ),
                                         child: Container(
@@ -167,11 +189,15 @@ class _ToDoNewState extends State {
                                           width: 62,
                                           decoration: BoxDecoration(
                                             borderRadius:
-                                                BorderRadius.circular(52),
+                                                BorderRadius.circular(62),
                                             color: const Color(0xffD9D9D9),
                                           ),
-                                          child:
-                                              const Icon(Icons.image_outlined),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(15.0),
+                                            child: Image.asset(
+                                              'assets/image.png',
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -180,7 +206,7 @@ class _ToDoNewState extends State {
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 10),
-                                      height: 120,
+                                      height: 110,
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
@@ -203,6 +229,7 @@ class _ToDoNewState extends State {
                                                       TextOverflow.ellipsis,
                                                   style: const TextStyle(
                                                     fontWeight: FontWeight.bold,
+                                                    // color: Color(0xff000000),
                                                   ),
                                                 ),
                                               ),
@@ -238,9 +265,9 @@ class _ToDoNewState extends State {
                                   ),
                                 ],
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ),
@@ -254,6 +281,7 @@ class _ToDoNewState extends State {
         backgroundColor: const Color(0xff6F51FF),
         shape: const CircleBorder(),
         onPressed: () {
+          clearControllers();
           displayBottomSheet();
         },
         child: const Icon(
@@ -289,6 +317,7 @@ class _ToDoNewState extends State {
                   children: [
                     const Text('Title'),
                     TextFormField(
+                      controller: _titleController,
                       maxLines: null,
                       decoration: InputDecoration(
                         enabledBorder: OutlineInputBorder(
@@ -310,6 +339,7 @@ class _ToDoNewState extends State {
                     ),
                     const Text('Description'),
                     TextFormField(
+                      controller: _descriptionController,
                       maxLines: null,
                       decoration: InputDecoration(
                         enabledBorder: OutlineInputBorder(
@@ -332,14 +362,10 @@ class _ToDoNewState extends State {
                     const Text('Date'),
                     GestureDetector(
                       child: TextFormField(
+                        controller: _dateController,
                         readOnly: true,
                         onTap: () {
-                          showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime(2024),
-                            lastDate: DateTime(2026),
-                          );
+                          dataPicker();
                         },
                         decoration: InputDecoration(
                           enabledBorder: OutlineInputBorder(
