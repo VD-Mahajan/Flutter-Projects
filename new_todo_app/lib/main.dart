@@ -1,9 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
 
-void main() {
+dynamic database;
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  database = openDatabase(
+    join(await getDatabasesPath(), 'ToDoTask.db'),
+    version: 1,
+    onCreate: (db, version) async {
+      await db.execute(
+          "CREATE TABLE TASK(taskId INTEGER PRIMARY KEY AUTOINCREMENT,title TEXT,description TEXT,date TEXT)");
+      // await db.rawDelete("DELETE FROM TASK");
+    },
+  );
   runApp(const MainApp());
+  print('App started');
+  // print(await database);
+  // dropDatabase();
 }
+
+// void dropDatabase() async {
+//   String path = join(await getDatabasesPath(), 'ToDoTask.db');
+//   bool exist = await databaseExists(path);
+
+//   if (exist) {
+//     await deleteDatabase(path);
+//     print("database dropped successfully");
+//   } else {
+//     print("Database not exist");
+//   }
+// }
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
@@ -12,6 +42,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       home: ToDoNew(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -23,46 +54,110 @@ class ToDoNew extends StatefulWidget {
 }
 
 class ToDoTask {
-  final String title;
-  final String description;
-  final String date;
-  const ToDoTask(
-      {required this.title, required this.description, required this.date});
+  int? taskId;
+  String title;
+  String description;
+  String date;
+
+  ToDoTask({
+    required this.title,
+    required this.description,
+    required this.date,
+  });
+  ToDoTask.fromDB({
+    required this.taskId,
+    required this.title,
+    required this.description,
+    required this.date,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'taskId': taskId,
+      'title': title,
+      'description': description,
+      'date': date,
+    };
+  }
+}
+
+Future insertData(ToDoTask taskObj) async {
+  final localDB = await database;
+  await localDB.insert(
+    "TASK",
+    taskObj.toMap(),
+    conflictAlgorithm: ConflictAlgorithm.replace,
+  );
+  List<ToDoTask> list = await getTaskData();
+  print(list[0].toMap());
+}
+
+Future<List<ToDoTask>> getTaskData() async {
+  final localDB = await database;
+  List taskList = await localDB.query("TASK");
+
+  return List.generate(
+    taskList.length,
+    (index) {
+      print(ToDoTask.fromDB(
+              taskId: taskList[index]['taskId'],
+              title: taskList[index]['title'],
+              description: taskList[index]['description'],
+              date: taskList[index]['date'])
+          .toMap());
+      return ToDoTask.fromDB(
+        taskId: taskList[index]['taskId'],
+        title: taskList[index]['title'],
+        description: taskList[index]['description'],
+        date: taskList[index]['date'],
+      );
+    },
+  );
+}
+
+void deleteTask(ToDoTask todoTaskObj) async {
+  final localDB = await database;
+
+  // todoTaskObj.title = todoTaskObj.toString();
+
+  await localDB.delete(
+    "TASK",
+    where: "taskId=?",
+    whereArgs: [todoTaskObj.taskId],
+  );
+  print('Delete query executed');
+}
+
+Future updateTask(
+  ToDoTask obj,
+  int taskId,
+) async {
+  final localDB = await database;
+
+  await localDB.update(
+    'TASK',
+    obj.toMap(),
+    where: "taskId=?",
+    whereArgs: [obj.taskId],
+  );
 }
 
 class _ToDoNewState extends State {
-  List toDoList = [
-    const ToDoTask(
-      title: "This is my first title",
-      description: "This is my first description",
-      date: "10 july 2024",
-    ),
-    const ToDoTask(
-      title: "This is my second title",
-      description: "This is my second description",
-      date: "10 july 2025",
-    ),
-    const ToDoTask(
-      title: "This is my first title",
-      description: "This is my first description",
-      date: "10 july 2024",
-    ),
-    const ToDoTask(
-      title: "This is my second title",
-      description: "This is my second description",
-      date: "10 july 2025",
-    ),
-    const ToDoTask(
-      title: "This is my first title",
-      description: "This is my first description",
-      date: "10 july 2024",
-    ),
-    const ToDoTask(
-      title: "This is my second title",
-      description: "This is my second description",
-      date: "10 july 2025",
-    ),
-  ];
+  List toDoList = [];
+  late List checkCircle;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  void fetchData() async {
+    List newToDoList = await getTaskData();
+    setState(() {
+      toDoList = newToDoList;
+    });
+  }
 
   //VARIABLES
   final TextEditingController _titleController = TextEditingController();
@@ -79,7 +174,7 @@ class _ToDoNewState extends State {
 
   void datePicker() async {
     DateTime? pickedDate = await showDatePicker(
-      context: context,
+      context: this.context,
       initialDate: DateTime.now(),
       firstDate: DateTime(2024),
       lastDate: DateTime(2026),
@@ -89,6 +184,10 @@ class _ToDoNewState extends State {
     setState(() {
       _dateController.text = formattedDate;
     });
+  }
+
+  void editTask(ToDoTask obj) {
+    displayBottomSheet(obj);
   }
 
   @override
@@ -160,114 +259,169 @@ class _ToDoNewState extends State {
                         child: ListView.builder(
                           itemCount: toDoList.length,
                           itemBuilder: (context, index) {
-                            return Container(
-                              margin: const EdgeInsets.symmetric(
-                                vertical: 7,
-                              ),
-                              decoration: const BoxDecoration(
-                                boxShadow: [
-                                  BoxShadow(
-                                    blurRadius: 10,
-                                    color: Color(0xffD9D9D9),
-                                    offset: Offset(10, 10),
-                                  ),
-                                ],
-                                color: Colors.white,
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                            return Slidable(
+                              direction: Axis.horizontal,
+                              endActionPane: ActionPane(
+                                motion: const StretchMotion(),
+                                extentRatio: 0.2,
                                 children: [
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 15,
-                                          vertical: 30,
-                                        ),
-                                        child: Container(
-                                          height: 62,
-                                          width: 62,
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(62),
-                                            color: const Color(0xffD9D9D9),
-                                          ),
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(15.0),
-                                            child: Image.asset(
-                                              'assets/image.png',
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                  const SizedBox(
+                                    height: 4,
                                   ),
                                   Expanded(
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 10),
-                                      height: 110,
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                  vertical: 5.0,
-                                                ),
-                                                child: Text(
-                                                  toDoList[index].title,
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ),
-                                              Text(
-                                                toDoList[index].description,
-                                                maxLines: 3,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ],
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                              vertical: 4.0,
-                                            ),
-                                            child: Text(toDoList[index].date),
-                                          ),
-                                        ],
-                                      ),
+                                    child: Column(
+                                      children: [
+                                        SlidableAction(
+                                          onPressed: (context) {
+                                            editTask(toDoList[index]);
+                                            fetchData();
+                                          },
+                                          icon: Icons.edit_outlined,
+                                          foregroundColor:
+                                              const Color(0xff6F51FF),
+                                          backgroundColor: const Color.fromARGB(
+                                              255, 255, 255, 255),
+                                        ),
+                                        SlidableAction(
+                                          onPressed: (context) {
+                                            deleteTask(toDoList[index]);
+                                            fetchData();
+                                          },
+                                          icon: Icons.delete_outline,
+                                          foregroundColor:
+                                              const Color(0xff6F51FF),
+                                          backgroundColor: const Color.fromARGB(
+                                              255, 255, 255, 255),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  const Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Padding(
-                                        padding: EdgeInsets.all(15.0),
-                                        child: Icon(
-                                          Icons.task_alt,
-                                          color: Colors.green,
-                                          size: 20,
+                                ],
+                              ),
+                              child: Container(
+                                margin: const EdgeInsets.symmetric(
+                                  vertical: 6,
+                                ),
+                                decoration: const BoxDecoration(
+                                  boxShadow: [
+                                    BoxShadow(
+                                      blurRadius: 10,
+                                      spreadRadius: 3,
+                                      color: Color(0xffD9D9D9),
+                                      // offset: Offset(0, 10),
+                                    ),
+                                  ],
+                                  color: Colors.white,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 15,
+                                            vertical: 30,
+                                          ),
+                                          child: Container(
+                                            height: 62,
+                                            width: 62,
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(62),
+                                              color: const Color(0xffD9D9D9),
+                                            ),
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(15.0),
+                                              child: Image.asset(
+                                                'assets/image.png',
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Expanded(
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10),
+                                        height: 110,
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Padding(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                    vertical: 5.0,
+                                                  ),
+                                                  child: Text(
+                                                    toDoList[index].title,
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                                Text(
+                                                  toDoList[index].description,
+                                                  maxLines: 3,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ],
+                                            ),
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                vertical: 4.0,
+                                              ),
+                                              child: Text(toDoList[index].date),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                ],
+                                    ),
+                                    const Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Padding(
+                                          padding: EdgeInsets.all(15.0),
+                                          child: Icon(
+                                            Icons.check_circle_rounded,
+                                            color: Colors.green,
+                                            size: 20,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             );
                           },
+                          //   separatorBuilder: (context, index) {
+                          //     return Container(
+                          //       height: 10,
+                          //       decoration: const BoxDecoration(
+                          //         color: Color.fromARGB(255, 255, 255, 255),
+                          //       ),
+                          //     );
+                          //   },
                         ),
                       ),
                     ),
@@ -294,10 +448,25 @@ class _ToDoNewState extends State {
     );
   }
 
-  displayBottomSheet() {
+  displayBottomSheet([ToDoTask? obj]) {
+    int? taskId;
+    if (obj != null) {
+      setState(() {
+        taskId = obj.taskId;
+        // title = obj.title;
+        // description = obj.description;
+        // date = obj.date;
+        // dateTime = obj.dateTime.toString();
+
+        _titleController.text = obj.title;
+        _descriptionController.text = obj.description;
+        _dateController.text = obj.date;
+      });
+    }
+
     showModalBottomSheet(
       isScrollControlled: true,
-      context: context,
+      context: this.context,
       builder: (context) {
         return Padding(
           padding: MediaQuery.of(context).viewInsets,
@@ -311,7 +480,10 @@ class _ToDoNewState extends State {
                   padding: EdgeInsets.symmetric(
                     vertical: 10,
                   ),
-                  child: Text('Create To-Do'),
+                  child: Text(
+                    'Create To-Do',
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+                  ),
                 ),
                 Form(
                   key: _formKey,
@@ -340,7 +512,7 @@ class _ToDoNewState extends State {
                           if (value == null || value.trim().isEmpty) {
                             return "Please add Title";
                           } else {
-                            null;
+                            return null;
                           }
                         },
                       ),
@@ -369,7 +541,7 @@ class _ToDoNewState extends State {
                           if (value == null || value.trim().isEmpty) {
                             return "Please add Description";
                           } else {
-                            null;
+                            return null;
                           }
                         },
                       ),
@@ -409,7 +581,7 @@ class _ToDoNewState extends State {
                             if (value == null || value.trim().isEmpty) {
                               return "Please select Date";
                             } else {
-                              null;
+                              return null;
                             }
                           },
                         ),
@@ -421,9 +593,35 @@ class _ToDoNewState extends State {
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     bool taskUpdated = _formKey.currentState!.validate();
                     if (taskUpdated) {
+                      if (obj == null) {
+                        await insertData(
+                          ToDoTask(
+                            title: _titleController.text,
+                            description: _descriptionController.text,
+                            date: _dateController.text,
+                          ),
+                        );
+                      } else {
+                        await updateTask(
+                          ToDoTask.fromDB(
+                            taskId: taskId,
+                            title: _titleController.text,
+                            description: _descriptionController.text,
+                            date: _dateController.text,
+                          ),
+                          taskId!,
+                        );
+                        print(taskId);
+                        // title = null;
+                        // description = null;
+                        // date = null;
+                        // dateTime = null;
+                      }
+                      fetchData();
+
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text("Task updated"),
