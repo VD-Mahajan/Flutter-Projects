@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
+import 'todotask.dart';
+
 dynamic database;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,17 +15,16 @@ void main() async {
     version: 1,
     onCreate: (db, version) async {
       await db.execute(
-          "CREATE TABLE TASK(taskId INTEGER PRIMARY KEY AUTOINCREMENT,title TEXT,description TEXT,date TEXT)");
-      // await db.rawDelete("DELETE FROM TASK");
+        '''CREATE TABLE TASK(taskId INTEGER PRIMARY KEY AUTOINCREMENT,title TEXT,description TEXT,date TEXT,taskDone INT)''',
+      );
     },
   );
   runApp(const MainApp());
-  print('App started');
-  // print(await database);
-  // dropDatabase();
+  // print('App started');
+  // await dropDatabase();
 }
 
-// void dropDatabase() async {
+// dropDatabase() async {
 //   String path = join(await getDatabasesPath(), 'ToDoTask.db');
 //   bool exist = await databaseExists(path);
 
@@ -47,40 +48,6 @@ class MainApp extends StatelessWidget {
   }
 }
 
-class ToDoNew extends StatefulWidget {
-  const ToDoNew({super.key});
-  @override
-  State createState() => _ToDoNewState();
-}
-
-class ToDoTask {
-  int? taskId;
-  String title;
-  String description;
-  String date;
-
-  ToDoTask({
-    required this.title,
-    required this.description,
-    required this.date,
-  });
-  ToDoTask.fromDB({
-    required this.taskId,
-    required this.title,
-    required this.description,
-    required this.date,
-  });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'taskId': taskId,
-      'title': title,
-      'description': description,
-      'date': date,
-    };
-  }
-}
-
 Future insertData(ToDoTask taskObj) async {
   final localDB = await database;
   await localDB.insert(
@@ -88,8 +55,6 @@ Future insertData(ToDoTask taskObj) async {
     taskObj.toMap(),
     conflictAlgorithm: ConflictAlgorithm.replace,
   );
-  List<ToDoTask> list = await getTaskData();
-  print(list[0].toMap());
 }
 
 Future<List<ToDoTask>> getTaskData() async {
@@ -99,17 +64,12 @@ Future<List<ToDoTask>> getTaskData() async {
   return List.generate(
     taskList.length,
     (index) {
-      print(ToDoTask.fromDB(
-              taskId: taskList[index]['taskId'],
-              title: taskList[index]['title'],
-              description: taskList[index]['description'],
-              date: taskList[index]['date'])
-          .toMap());
       return ToDoTask.fromDB(
         taskId: taskList[index]['taskId'],
         title: taskList[index]['title'],
         description: taskList[index]['description'],
         date: taskList[index]['date'],
+        taskDone: taskList[index]['taskDone'],
       );
     },
   );
@@ -118,34 +78,51 @@ Future<List<ToDoTask>> getTaskData() async {
 void deleteTask(ToDoTask todoTaskObj) async {
   final localDB = await database;
 
-  // todoTaskObj.title = todoTaskObj.toString();
-
   await localDB.delete(
     "TASK",
     where: "taskId=?",
     whereArgs: [todoTaskObj.taskId],
   );
-  print('Delete query executed');
 }
 
-Future updateTask(
-  ToDoTask obj,
-  int taskId,
-) async {
+Future updateTask(ToDoTask obj, [int? taskDone]) async {
   final localDB = await database;
+  if (taskDone != null) {
+    await localDB.update(
+      'TASK',
+      obj.toMap(),
+      where: "taskId=?",
+      whereArgs: [obj.taskId],
+    );
+  } else {
+    await localDB.update(
+      'TASK',
+      obj.toMap(),
+      where: "taskId=?",
+      whereArgs: [obj.taskId],
+    );
+  }
+}
 
-  await localDB.update(
-    'TASK',
-    obj.toMap(),
-    where: "taskId=?",
-    whereArgs: [obj.taskId],
-  );
+class ToDoNew extends StatefulWidget {
+  const ToDoNew({super.key});
+  @override
+  State createState() => _ToDoNewState();
 }
 
 class _ToDoNewState extends State {
-  List toDoList = [];
-  late List checkCircle;
+  //CONTROLLERS
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _dateController = TextEditingController();
 
+  //LIST
+  List toDoList = [];
+
+  //KEYS
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  //METHODS
   @override
   void initState() {
     super.initState();
@@ -158,13 +135,6 @@ class _ToDoNewState extends State {
       toDoList = newToDoList;
     });
   }
-
-  //VARIABLES
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
-  final TextEditingController _dateController = TextEditingController();
-
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   void clearControllers() {
     _titleController.clear();
@@ -395,16 +365,38 @@ class _ToDoNewState extends State {
                                         ),
                                       ),
                                     ),
-                                    const Column(
+                                    Column(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
                                         Padding(
-                                          padding: EdgeInsets.all(15.0),
-                                          child: Icon(
-                                            Icons.check_circle_rounded,
-                                            color: Colors.green,
-                                            size: 20,
+                                          padding: const EdgeInsets.all(15.0),
+                                          child: IconButton(
+                                            onPressed: () async {
+                                              if (toDoList[index].taskDone ==
+                                                  0) {
+                                                setState(() {
+                                                  toDoList[index].taskDone = 1;
+                                                });
+                                              } else {
+                                                setState(() {
+                                                  toDoList[index].taskDone = 0;
+                                                });
+                                              }
+                                              await updateTask(
+                                                  toDoList[index], 0);
+                                            },
+                                            icon:
+                                                (toDoList[index].taskDone == 0)
+                                                    ? const Icon(
+                                                        Icons
+                                                            .check_circle_outline_outlined,
+                                                        color: Colors.grey,
+                                                      )
+                                                    : const Icon(
+                                                        Icons.check_circle,
+                                                        color: Colors.green,
+                                                      ),
                                           ),
                                         ),
                                       ],
@@ -414,14 +406,6 @@ class _ToDoNewState extends State {
                               ),
                             );
                           },
-                          //   separatorBuilder: (context, index) {
-                          //     return Container(
-                          //       height: 10,
-                          //       decoration: const BoxDecoration(
-                          //         color: Color.fromARGB(255, 255, 255, 255),
-                          //       ),
-                          //     );
-                          //   },
                         ),
                       ),
                     ),
@@ -453,11 +437,6 @@ class _ToDoNewState extends State {
     if (obj != null) {
       setState(() {
         taskId = obj.taskId;
-        // title = obj.title;
-        // description = obj.description;
-        // date = obj.date;
-        // dateTime = obj.dateTime.toString();
-
         _titleController.text = obj.title;
         _descriptionController.text = obj.description;
         _dateController.text = obj.date;
@@ -472,7 +451,6 @@ class _ToDoNewState extends State {
           padding: MediaQuery.of(context).viewInsets,
           child: Container(
             padding: const EdgeInsets.all(20.0),
-            // padding: MediaQuery.of(context).viewInsets,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -602,6 +580,7 @@ class _ToDoNewState extends State {
                             title: _titleController.text,
                             description: _descriptionController.text,
                             date: _dateController.text,
+                            taskDone: 0,
                           ),
                         );
                       } else {
@@ -611,14 +590,10 @@ class _ToDoNewState extends State {
                             title: _titleController.text,
                             description: _descriptionController.text,
                             date: _dateController.text,
+                            taskDone: obj.taskDone,
                           ),
                           taskId!,
                         );
-                        print(taskId);
-                        // title = null;
-                        // description = null;
-                        // date = null;
-                        // dateTime = null;
                       }
                       fetchData();
 
