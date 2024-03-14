@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
+import 'package:new_todo_app/loginscreen.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -42,7 +43,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: ToDoNew(),
+      home: LoginPage(),
       debugShowCheckedModeBanner: false,
     );
   }
@@ -176,7 +177,7 @@ class _ToDoNewState extends State {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Good Morning",
+                  "Hello 👋",
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w400,
@@ -240,28 +241,50 @@ class _ToDoNewState extends State {
                                   ),
                                   Expanded(
                                     child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
                                       children: [
-                                        SlidableAction(
-                                          onPressed: (context) {
-                                            editTask(toDoList[index]);
-                                            fetchData();
-                                          },
-                                          icon: Icons.edit_outlined,
-                                          foregroundColor:
-                                              const Color(0xff6F51FF),
-                                          backgroundColor: const Color.fromARGB(
-                                              255, 255, 255, 255),
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xff6F51FF),
+                                            borderRadius:
+                                                BorderRadius.circular(30),
+                                          ),
+                                          child: IconButton(
+                                            constraints: const BoxConstraints(
+                                              minHeight: 30,
+                                              minWidth: 30,
+                                            ),
+                                            onPressed: () {
+                                              editTask(toDoList[index]);
+                                              fetchData();
+                                            },
+                                            icon: const Icon(
+                                              Icons.edit_outlined,
+                                              color: Colors.white,
+                                            ),
+                                          ),
                                         ),
-                                        SlidableAction(
-                                          onPressed: (context) {
-                                            deleteTask(toDoList[index]);
-                                            fetchData();
-                                          },
-                                          icon: Icons.delete_outline,
-                                          foregroundColor:
-                                              const Color(0xff6F51FF),
-                                          backgroundColor: const Color.fromARGB(
-                                              255, 255, 255, 255),
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xff6F51FF),
+                                            borderRadius:
+                                                BorderRadius.circular(30),
+                                          ),
+                                          child: IconButton(
+                                            constraints: const BoxConstraints(
+                                              minHeight: 30,
+                                              minWidth: 30,
+                                            ),
+                                            onPressed: () {
+                                              deleteTask(toDoList[index]);
+                                              fetchData();
+                                            },
+                                            icon: const Icon(
+                                              Icons.delete_outline,
+                                              color: Colors.white,
+                                            ),
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -303,12 +326,11 @@ class _ToDoNewState extends State {
                                               borderRadius:
                                                   BorderRadius.circular(62),
                                               color: const Color(0xffD9D9D9),
-                                            ),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(15.0),
-                                              child: Image.asset(
-                                                'assets/image.png',
+                                              image: const DecorationImage(
+                                                image: AssetImage(
+                                                  'assets/logo2.png',
+                                                ),
+                                                fit: BoxFit.cover,
                                               ),
                                             ),
                                           ),
