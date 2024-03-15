@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:new_todo_app/loginscreen.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+// ignore: depend_on_referenced_packages
+import 'package:google_fonts/google_fonts.dart';
 
 import 'todotask.dart';
 
@@ -25,17 +27,17 @@ void main() async {
   // await dropDatabase();
 }
 
-// dropDatabase() async {
-//   String path = join(await getDatabasesPath(), 'ToDoTask.db');
-//   bool exist = await databaseExists(path);
+dropDatabase() async {
+  String path = join(await getDatabasesPath(), 'ToDoTask.db');
+  bool exist = await databaseExists(path);
 
-//   if (exist) {
-//     await deleteDatabase(path);
-//     print("database dropped successfully");
-//   } else {
-//     print("Database not exist");
-//   }
-// }
+  if (exist) {
+    await deleteDatabase(path);
+    print("database dropped successfully");
+  } else {
+    print("Database not exist");
+  }
+}
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
@@ -168,8 +170,8 @@ class _ToDoNewState extends State {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(
+          Padding(
+            padding: const EdgeInsets.symmetric(
               vertical: 45,
               horizontal: 29,
             ),
@@ -178,7 +180,7 @@ class _ToDoNewState extends State {
               children: [
                 Text(
                   "Hello 👋",
-                  style: TextStyle(
+                  style: GoogleFonts.quicksand(
                     fontSize: 22,
                     fontWeight: FontWeight.w400,
                     color: Colors.white,
@@ -186,9 +188,9 @@ class _ToDoNewState extends State {
                 ),
                 Text(
                   "Vishal Mahajan",
-                  style: TextStyle(
+                  style: GoogleFonts.quicksand(
                     fontSize: 30,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
                 ),
@@ -206,11 +208,11 @@ class _ToDoNewState extends State {
               ),
               child: Column(
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 20.0),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20.0),
                     child: Text(
                       "CREATE TO DO LIST",
-                      style: TextStyle(
+                      style: GoogleFonts.quicksand(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -232,6 +234,7 @@ class _ToDoNewState extends State {
                           itemBuilder: (context, index) {
                             return Slidable(
                               direction: Axis.horizontal,
+                              // enabled: false,
                               endActionPane: ActionPane(
                                 motion: const StretchMotion(),
                                 extentRatio: 0.2,
@@ -256,6 +259,7 @@ class _ToDoNewState extends State {
                                               minWidth: 30,
                                             ),
                                             onPressed: () {
+                                              setState(() {});
                                               editTask(toDoList[index]);
                                               fetchData();
                                             },
@@ -362,7 +366,8 @@ class _ToDoNewState extends State {
                                                     maxLines: 1,
                                                     overflow:
                                                         TextOverflow.ellipsis,
-                                                    style: const TextStyle(
+                                                    style:
+                                                        GoogleFonts.quicksand(
                                                       fontWeight:
                                                           FontWeight.bold,
                                                     ),
@@ -373,6 +378,8 @@ class _ToDoNewState extends State {
                                                   maxLines: 3,
                                                   overflow:
                                                       TextOverflow.ellipsis,
+                                                  style:
+                                                      GoogleFonts.quicksand(),
                                                 ),
                                               ],
                                             ),
@@ -381,7 +388,12 @@ class _ToDoNewState extends State {
                                                   const EdgeInsets.symmetric(
                                                 vertical: 4.0,
                                               ),
-                                              child: Text(toDoList[index].date),
+                                              child: Text(
+                                                toDoList[index].date,
+                                                style: GoogleFonts.quicksand(
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -476,13 +488,14 @@ class _ToDoNewState extends State {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Padding(
-                  padding: EdgeInsets.symmetric(
+                Padding(
+                  padding: const EdgeInsets.symmetric(
                     vertical: 10,
                   ),
                   child: Text(
                     'Create To-Do',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+                    style: GoogleFonts.quicksand(
+                        fontSize: 22, fontWeight: FontWeight.w600),
                   ),
                 ),
                 Form(
@@ -490,7 +503,10 @@ class _ToDoNewState extends State {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Title'),
+                      Text(
+                        'Title',
+                        style: GoogleFonts.quicksand(),
+                      ),
                       TextFormField(
                         controller: _titleController,
                         maxLines: null,
@@ -519,7 +535,10 @@ class _ToDoNewState extends State {
                       const SizedBox(
                         height: 10,
                       ),
-                      const Text('Description'),
+                      Text(
+                        'Description',
+                        style: GoogleFonts.quicksand(),
+                      ),
                       TextFormField(
                         controller: _descriptionController,
                         maxLines: null,
@@ -546,9 +565,12 @@ class _ToDoNewState extends State {
                         },
                       ),
                       const SizedBox(
-                        height: 20,
+                        height: 10,
                       ),
-                      const Text('Date'),
+                      Text(
+                        'Date',
+                        style: GoogleFonts.quicksand(),
+                      ),
                       GestureDetector(
                         child: TextFormField(
                           controller: _dateController,
@@ -635,12 +657,12 @@ class _ToDoNewState extends State {
                     ),
                     minimumSize: const Size(300, 50),
                   ),
-                  child: const Text(
+                  child: Text(
                     "Submit",
-                    style: TextStyle(
-                      color: Colors.white,
+                    style: GoogleFonts.quicksand(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
+                      color: Colors.white,
                     ),
                   ),
                 ),

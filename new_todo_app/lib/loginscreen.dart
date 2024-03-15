@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:new_todo_app/main.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -31,9 +32,9 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Login Page",
-          style: TextStyle(
+          style: GoogleFonts.quicksand(
             color: Colors.white,
             fontSize: 27,
             fontWeight: FontWeight.bold,
@@ -67,7 +68,10 @@ class _LoginPageState extends State<LoginPage> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    label: const Text('Username'),
+                    label: Text(
+                      'Username',
+                      style: GoogleFonts.quicksand(),
+                    ),
                     hintText: 'Enter username',
                   ),
                   validator: (value) {
@@ -90,7 +94,10 @@ class _LoginPageState extends State<LoginPage> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    label: const Text('Password'),
+                    label: Text(
+                      'Password',
+                      style: GoogleFonts.quicksand(),
+                    ),
                     hintText: 'Enter password',
                   ),
                   validator: (value) {
@@ -153,7 +160,10 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: const Text('Login'),
+                    child: Text(
+                      'Login',
+                      style: GoogleFonts.quicksand(),
+                    ),
                   ),
                 ),
               ),
