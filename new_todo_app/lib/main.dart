@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:new_todo_app/loginscreen.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-// ignore: depend_on_referenced_packages
 import 'package:google_fonts/google_fonts.dart';
 
 import 'todotask.dart';
