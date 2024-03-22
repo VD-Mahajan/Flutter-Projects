@@ -208,12 +208,12 @@ class _ToDoNewState extends State {
               child: Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20.0),
+                    padding: const EdgeInsets.symmetric(vertical: 18.0),
                     child: Text(
                       "CREATE TO DO LIST",
                       style: GoogleFonts.quicksand(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),

@@ -52,7 +52,7 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               Center(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 80.0),
+                  padding: const EdgeInsets.symmetric(vertical: 40.0),
                   child: SizedBox(
                     height: 250,
                     width: 250,
@@ -140,7 +140,7 @@ class _LoginPageState extends State<LoginPage> {
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('User not present'),
+                              content: Text('Invalid credentials'),
                               backgroundColor: Colors.red,
                             ),
                           );
