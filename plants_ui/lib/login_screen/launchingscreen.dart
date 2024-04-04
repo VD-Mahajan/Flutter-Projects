@@ -48,14 +48,15 @@ class LaunchScreen extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: 20,
+              horizontal: 25,
             ),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(),
-              onPressed: () {},
+            child: GestureDetector(
+              onTap: () {},
               child: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
+                height: 50,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  gradient: const LinearGradient(
                     colors: [
                       Color.fromRGBO(124, 180, 70, 1),
                       Color.fromRGBO(62, 102, 24, 1),
