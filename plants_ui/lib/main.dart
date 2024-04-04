@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:plants_ui/login_screen/launchingscreen.dart';
+import 'package:plants_ui/login_screen/loginscreen.dart';
 
 void main() {
   runApp(const MainApp());
@@ -15,6 +16,7 @@ class MainApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const LaunchScreen(),
+        '/login': (context) => const LoginScreen(),
       },
     );
   }

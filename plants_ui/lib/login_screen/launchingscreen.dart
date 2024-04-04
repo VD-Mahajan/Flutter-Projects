@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:plants_ui/login_screen/loginscreen.dart';
 
 class LaunchScreen extends StatelessWidget {
   const LaunchScreen({super.key});
@@ -51,7 +52,9 @@ class LaunchScreen extends StatelessWidget {
               horizontal: 25,
             ),
             child: GestureDetector(
-              onTap: () {},
+              onTap: () {
+                Navigator.pushNamed(context, '/login');
+              },
               child: Container(
                 height: 50,
                 decoration: BoxDecoration(
