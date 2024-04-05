@@ -1,7 +1,4 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:plants_ui/login_screen/loginscreen.dart';
 
 class LaunchScreen extends StatelessWidget {
   const LaunchScreen({super.key});

@@ -93,10 +93,14 @@ class _LoginScreenState extends State<LoginScreen> {
                             content: Text('Login successfull'),
                           ),
                         );
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) {
-                          return const Verification();
-                        }));
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return const Verification();
+                            },
+                          ),
+                        );
                         clearControllers();
                       }
                     },

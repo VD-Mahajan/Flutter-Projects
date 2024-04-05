@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:otp_text_field/otp_field.dart';
 import 'package:otp_text_field/style.dart';
+import 'package:plants_ui/mainapp/homescreen.dart';
 
 class Verification extends StatefulWidget {
   const Verification({super.key});
@@ -96,20 +97,30 @@ class _VerificationState extends State<Verification> {
                   height: 20,
                 ),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return const HomeScreen();
+                        },
+                      ),
+                    );
+                  },
                   child: Container(
                     width: MediaQuery.of(context).size.width * 1,
                     height: 50,
                     decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Color.fromRGBO(124, 180, 70, 1),
-                              Color.fromRGBO(62, 102, 24, 1),
-                            ])),
-                    child: Center(
+                      borderRadius: BorderRadius.circular(10),
+                      gradient: const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Color.fromRGBO(124, 180, 70, 1),
+                            Color.fromRGBO(62, 102, 24, 1),
+                          ]),
+                    ),
+                    child: const Center(
                       child: Text(
                         'Submit',
                         style: TextStyle(
