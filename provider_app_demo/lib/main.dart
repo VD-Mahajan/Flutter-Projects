@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -45,15 +44,17 @@ class _MyAppState extends State<MyApp> {
                 height: 20,
               ),
               Text('${Provider.of<Company>(context).empCount}'),
+              const SizedBox(
+                height: 20,
+              ),
               ElevatedButton(
                 onPressed: () {
                   log('pressed');
                   Provider.of<Company>(context, listen: false)
                       .changeCompany('NVIDIA', 511);
-                  setState(() {});
                 },
                 child: const Text('change company'),
-              )
+              ),
             ],
           ),
         ],
