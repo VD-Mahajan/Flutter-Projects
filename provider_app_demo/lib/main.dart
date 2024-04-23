@@ -2,7 +2,10 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+// import 'multiprovider.dart';
+
 void main() {
+  // runApp(const MyMultiProvider());
   runApp(const MainApp());
 }
 
@@ -11,7 +14,7 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Provider(
+    return ChangeNotifierProvider(
       create: (context) {
         return Company(companyName: 'Google', empCount: 250);
       },
@@ -43,7 +46,7 @@ class _MyAppState extends State<MyApp> {
               const SizedBox(
                 height: 20,
               ),
-              Text('${Provider.of<Company>(context).empCount}'),
+              Text('${context.read().empCount}'),
               const SizedBox(
                 height: 20,
               ),
@@ -63,7 +66,7 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-class Company {
+class Company with ChangeNotifier {
   String companyName;
   int empCount;
 
@@ -72,6 +75,6 @@ class Company {
   void changeCompany(String companyName, int empCount) {
     this.companyName = companyName;
     this.empCount = empCount;
-    // notifyListeners();
+    notifyListeners();
   }
 }
